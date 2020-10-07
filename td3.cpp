@@ -101,7 +101,7 @@ bool simulate_projectile(const double magnitude, const double angle,
   hit_target = false;
   hit_obstacle = false;
   while (y >= 0 && (!hit_target) && (!hit_obstacle)) {
-    cout << telemetry_current_size << ' ' << telemetry_max_size << endl;
+    //cout << telemetry_current_size << ' ' << telemetry_max_size << endl;
 
     telemetry = append_to_array(t, telemetry, telemetry_current_size, telemetry_max_size);
     telemetry = append_to_array(x, telemetry, telemetry_current_size, telemetry_max_size);
@@ -124,6 +124,27 @@ bool simulate_projectile(const double magnitude, const double angle,
 }
 
 
+void arrange(double *array, int len_arr){
+  int j = len_arr / 3 - 1;
+  double tmp;
+  
+  while ((j > 0) && (array[3 * (j - 1)] > array[3 * j])){
+    tmp = array[3 * (j - 1)];
+    array[3 * (j - 1)] = array[3 * j];
+    array[3 * j] = tmp;
+
+    tmp = array[3 * (j - 1) + 1];
+    array[3 * (j - 1) + 1] = array[3 * j + 1];
+    array[3 * j + 1] = tmp;
+
+    tmp = array[3 * (j - 1) + 2];
+    array[3 * (j - 1) + 2] = array[3 * j + 2];
+    array[3 * j + 2] = tmp;
+
+    j--;
+  }
+}
+
 void merge_telemetry(double **telemetries,
                      int tot_telemetries,
                      int *telemetries_sizes,
@@ -132,4 +153,22 @@ void merge_telemetry(double **telemetries,
                      int &telemetry_max_size) {
   // IMPLEMENT YOUR FUNCTION HERE
 
+  bool exitp = false;
+  int pos = 0;  // counted in timestamps (ie size 3 double)
+  while (!exitp){
+    exitp = true;
+    for (int i = 0; i < tot_telemetries; i++){
+      if (3 * pos < telemetries_sizes[i]){
+	exitp = false; // delay exit condition as array is nonempty
+	
+	telemetry = append_to_array(telemetries[i][3*pos], telemetry, telemetry_current_size, telemetry_max_size);
+	telemetry = append_to_array(telemetries[i][3*pos+1], telemetry, telemetry_current_size, telemetry_max_size);
+	telemetry = append_to_array(telemetries[i][3*pos+2], telemetry, telemetry_current_size, telemetry_max_size);
+	
+	arrange(telemetry, telemetry_current_size);
+      }
+    }
+
+    pos++;
+  }
 }
